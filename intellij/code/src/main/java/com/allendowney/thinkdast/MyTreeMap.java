@@ -3,13 +3,7 @@
  */
 package com.allendowney.thinkdast;
 
-import java.util.Collection;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Implementation of a Map using a binary search tree.
@@ -71,7 +65,17 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		@SuppressWarnings("unchecked")
 		Comparable<? super K> k = (Comparable<? super K>) target;
 
-		// TODO: FILL THIS IN!
+		Node node = root;
+		while (node != null) {
+			int cmp = k.compareTo(node.key);
+			if (cmp < 0) {
+				node = node.left;
+			} else if (cmp > 0) {
+				node = node.right;
+			} else {
+				return node;
+			}
+		}
 		return null;
 	}
 
@@ -95,7 +99,16 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private boolean containsValueHelper(Node node, Object target) {
-		// TODO: FILL THIS IN!
+		Stack<Node> stack = new Stack<>();
+		stack.push(node.left);
+		stack.push(node.right);
+
+		while (!stack.isEmpty()) {
+			node = stack.pop();
+			if (node.left != null) stack.push(node.left);
+			if (node.right != null) stack.push(node.right);
+			if (equals(target, node.value)) return true;
+		}
 		return false;
 	}
 
@@ -120,9 +133,20 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public Set<K> keySet() {
+		return keySetHelper(root);
+	}
+
+	public Set<K> keySetHelper(Node node) {
 		Set<K> set = new LinkedHashSet<K>();
-		// TODO: FILL THIS IN!
+		addKey(node, set);
 		return set;
+	}
+
+	public void addKey(Node node, Set<K> set) {
+		if (node == null) return;
+		addKey(node.left, set);
+		set.add(node.key);
+		addKey(node.right, set);
 	}
 
 	@Override
@@ -139,7 +163,35 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private V putHelper(Node node, K key, V value) {
-		// TODO: FILL THIS IN!
+		Comparable<? super K> k = (Comparable<? super K>) key;
+
+		int i = 0;
+		while (i < size()) {
+			i++;
+			int cmp = k.compareTo(node.key);
+			if (cmp == 0) {
+				V oldVal = node.value;
+				node.key = key;
+				node.value = value;
+				return oldVal;
+			}
+			if (cmp < 0) {
+				if (node.left == null) {
+					size++;
+					node.left = new Node(key, value);
+					return value;
+				}
+				node = node.left;
+			}
+			if (cmp > 0) {
+				if (node.right == null) {
+					size++;
+					node.right = new Node(key, value);
+					return value;
+				}
+				node = node.right;
+			}
+		}
 		return null;
 	}
 
